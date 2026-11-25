@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b36"><title>Sky Hopper</title>
+<style>
+:root{font-family:"Avenir Next",Avenir,"Segoe UI",sans-serif;color:#f5f7ff;background:#101b36}
+*{box-sizing:border-box}body{min-height:100vh;margin:0;padding:24px 14px;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 0%,#314675,transparent 55%),#101b36}
+.shell{width:min(100%,520px)}header{display:flex;align-items:end;justify-content:space-between;margin:0 4px 14px}
+.kicker{margin:0 0 5px;color:#9db2e5;font-size:.7rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+h1{margin:0;font-size:clamp(1.7rem,7vw,2.4rem);letter-spacing:-.05em}
+.score{padding:9px 13px;border:1px solid #ffffff25;border-radius:14px;background:#ffffff12;text-align:right;color:#9db2e5;font-size:.65rem;font-weight:800;letter-spacing:.1em}
+.score strong{display:inline;color:white;font-size:1.2rem;letter-spacing:0}
+.frame{position:relative;overflow:hidden;border:1px solid #ffffff30;border-radius:22px;background:#a9e6fa;box-shadow:0 24px 70px #0005}
+canvas{display:block;width:100%;height:auto;aspect-ratio:3/4;touch-action:manipulation}
+.message{position:absolute;inset:0;display:grid;place-items:center;padding:24px;background:linear-gradient(#0e1f3c0a,#0e1f3c40);text-align:center;transition:opacity .18s,visibility .18s}
+.message.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.card{width:min(100%,310px);padding:24px 22px 22px;border:1px solid #ffffffa0;border-radius:22px;background:#ffffffe8;color:#172442;box-shadow:0 12px 32px #1c406129;backdrop-filter:blur(10px)}
+.tag{display:inline-block;margin-bottom:10px;padding:5px 9px;border-radius:99px;background:#e5f6ff;color:#367d9a;font-size:.65rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+h2{margin:0;font-size:1.7rem;letter-spacing:-.04em}.card p{margin:9px 0 18px;color:#586985;line-height:1.5}
+button{width:100%;border:0;border-radius:13px;padding:13px 16px;background:#ffb84e;color:#38230a;font:inherit;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #e6922c}
+button:hover{filter:brightness(1.04);transform:translateY(-1px)}button:active{transform:translateY(2px);box-shadow:0 2px 0 #e6922c}
+button:focus-visible{outline:3px solid #345f9c;outline-offset:4px}
+.hint{margin:14px 0 0;color:#9db2e5;font-size:.83rem;text-align:center}kbd{padding:3px 7px;border:1px solid #ffffff33;border-radius:6px;background:#ffffff12;color:#e9efff;font:inherit;font-size:.75rem}
+@media(max-width:420px){body{padding:16px 10px}.frame{border-radius:17px}.hint{font-size:.75rem}}
+</style></head><body>
+<main class="shell">
+<header><div><p class="kicker">A tiny flying game</p><h1>Sky Hopper</h1></div><div class="score" aria-live="polite">SCORE <strong id="score">0</strong><br>BEST <strong id="best">0</strong></div></header>
+<section class="frame" aria-label="Sky Hopper game">
+<canvas id="game" width="480" height="640" aria-label="Dodge the green pipes by flapping through the gaps"></canvas>
+<div class="message" id="message"><div class="card"><span class="tag" id="tag">Ready when you are</span><h2 id="title">Take flight!</h2><p id="copy">Tap, click, or press Space to flap. Slip through the gaps and see how far you can go.</p><button id="start">Start flying</button></div></div>
+</section><p class="hint">Tap or click to flap · <kbd>Space</kbd> / <kbd>↑</kbd> also work</p>
+</main>
+<script>
+(() => {
+const canvas=document.querySelector("#game"),ctx=canvas.getContext("2d"),$=s=>document.querySelector(s);
+const scoreEl=$("#score"),bestEl=$("#best"),message=$("#message"),tag=$("#tag"),title=$("#title"),copy=$("#copy"),start=$("#start");
+const W=480,H=640,FLOOR=590,PIPE=76,GAP=166,bird={x:142,y:278,r:16,v:0,rot:0};
+let pipes=[],state="ready",score=0,best=Number(localStorage.getItem("sky-hopper-best")||0),frame=0,ground=0,last=0;
+bestEl.textContent=best;
+function overlay(a,b,c,d){tag.textContent=a;title.textContent=b;copy.textContent=c;start.textContent=d;message.classList.remove("hidden")}
+function reset(){bird.y=278;bird.v=0;bird.rot=0;pipes=[];frame=0;ground=0;score=0;scoreEl.textContent=0}
+function begin(){reset();state="playing";message.classList.add("hidden");bird.v=-7.1}
+function act(e){if(e)e.preventDefault();if(state==="ready"||state==="over")begin();else bird.v=-7.1}
+function finish(){if(state!=="playing")return;state="over";const record=score>best;if(record){best=score;bestEl.textContent=best;localStorage.setItem("sky-hopper-best",best)}
+overlay(record&&score>0?"New personal best":"Flight complete","Nice try!","You flew through "+score+" "+(score===1?"gap.":"gaps.")+" "+(score===0?"Give it another go!":"Can you beat that?"),"Try again")}
+function cloud(x,y,s,a){ctx.save();ctx.globalAlpha=a;ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(x,y,29*s,13*s,0,0,7);ctx.ellipse(x-19*s,y+2*s,17*s,10*s,0,0,7);ctx.ellipse(x+17*s,y-5*s,20*s,15*s,0,0,7);ctx.fill();ctx.restore()}
+function bg(){let g=ctx.createLinearGradient(0,0,0,FLOOR);g.addColorStop(0,"#85d8f4");g.addColorStop(.62,"#b9edfa");g.addColorStop(1,"#e5f8fc");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+cloud(86-frame*.22%580,116,.95,.82);cloud(344-frame*.13%600,196,.72,.62);cloud(548-frame*.18%700,78,.65,.7);
+ctx.fillStyle="#a4dfbd";ctx.beginPath();ctx.moveTo(0,FLOOR);ctx.quadraticCurveTo(92,433,198,FLOOR);ctx.quadraticCurveTo(316,454,420,FLOOR);ctx.quadraticCurveTo(458,548,W,520);ctx.lineTo(W,FLOOR);ctx.fill();
+ctx.fillStyle="#83cfa8";ctx.beginPath();ctx.moveTo(0,FLOOR);ctx.quadraticCurveTo(110,500,246,FLOOR);ctx.quadraticCurveTo(370,476,W,FLOOR-20);ctx.lineTo(W,FLOOR);ctx.fill()}
+function drawPipe(p){let b=p.top+GAP,g=ctx.createLinearGradient(p.x,0,p.x+PIPE,0);g.addColorStop(0,"#38aa6d");g.addColorStop(.25,"#63d28b");g.addColorStop(.72,"#4bc47c");g.addColorStop(1,"#2c985e");
+ctx.fillStyle=g;ctx.fillRect(p.x,0,PIPE,p.top-19);ctx.fillRect(p.x,b+19,PIPE,FLOOR-b);
+ctx.fillStyle="#64d990";ctx.fillRect(p.x-7,p.top-24,PIPE+14,24);ctx.fillRect(p.x-7,b,PIPE+14,24);
+ctx.fillStyle="#ffffff3b";ctx.fillRect(p.x+10,0,8,Math.max(0,p.top-24));ctx.fillRect(p.x+10,b+24,8,Math.max(0,FLOOR-b-24));
+ctx.strokeStyle="#196f4c52";ctx.lineWidth=2;ctx.strokeRect(p.x+1,0,PIPE-2,p.top-19);ctx.strokeRect(p.x+1,b+19,PIPE-2,FLOOR-b);
+ctx.beginPath();ctx.roundRect(p.x-7,p.top-24,PIPE+14,24,7);ctx.stroke();ctx.beginPath();ctx.roundRect(p.x-7,b,PIPE+14,24,7);ctx.stroke()}
+function drawBird(){ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(bird.rot);ctx.fillStyle="#ffba55";ctx.strokeStyle="#c87930";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,18,14,0,0,7);ctx.fill();ctx.stroke();
+ctx.fillStyle="#ffe08a";ctx.beginPath();ctx.ellipse(-6,-3+Math.sin(frame*.42)*2,9,6,-.28,0,7);ctx.fill();ctx.stroke();
+ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(8,-5,5,0,7);ctx.fill();ctx.fillStyle="#24304e";ctx.beginPath();ctx.arc(10,-5,2.1,0,7);ctx.fill();
+ctx.fillStyle="#fa7650";ctx.beginPath();ctx.moveTo(15,0);ctx.lineTo(27,3);ctx.lineTo(15,7);ctx.closePath();ctx.fill();ctx.restore()}
+function floor(){ctx.fillStyle="#f6d686";ctx.fillRect(0,FLOOR,W,H-FLOOR);ctx.fillStyle="#8dd596";ctx.fillRect(0,FLOOR,W,13);ctx.fillStyle="#5eb879";ctx.fillRect(0,FLOOR+11,W,4);
+ctx.save();ctx.beginPath();ctx.rect(0,FLOOR+15,W,H-FLOOR-15);ctx.clip();ctx.strokeStyle="#be8b4338";ctx.lineWidth=2;for(let x=-32-ground;x<W+32;x+=32){ctx.beginPath();ctx.moveTo(x,FLOOR+26);ctx.lineTo(x+19,H);ctx.stroke()}ctx.restore()}
+function draw(){bg();pipes.forEach(drawPipe);floor();drawBird()}
+function hit(p){let l=bird.x-bird.r+3,r=bird.x+bird.r-3,t=bird.y-bird.r+3,b=bird.y+bird.r-3,g=p.top+GAP;return r>p.x-5&&l<p.x+PIPE+5&&(t<p.top||b>g)}
+function update(dt){if(state!=="playing"){if(state==="ready")bird.y=278+Math.sin(performance.now()/290)*7;return}
+frame+=dt;ground=(ground+3.1*dt)%32;bird.v+=.39*dt;bird.y+=bird.v*dt;bird.rot=Math.min(.85,Math.max(-.48,bird.v*.075));
+if(frame>78&&Math.floor(frame)%96<dt)pipes.push({x:W+8,top:86+Math.random()*270,passed:false});
+pipes.forEach(p=>{p.x-=2.75*dt;if(!p.passed&&p.x+PIPE<bird.x){p.passed=true;score++;scoreEl.textContent=score}if(hit(p))finish()});
+pipes=pipes.filter(p=>p.x+PIPE>-12);if(bird.y-bird.r<0||bird.y+bird.r>FLOOR)finish()}
+function loop(t){let dt=Math.min((t-(last||t))/16.67,2);last=t;update(dt);draw();requestAnimationFrame(loop)}
+canvas.addEventListener("pointerdown",act);start.addEventListener("click",begin);
+window.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp"){e.preventDefault();if(!e.repeat)act()}});
+draw();requestAnimationFrame(loop)
+})();
+</script></body></html>
