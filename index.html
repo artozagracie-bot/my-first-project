@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101b36"><title>Sky Hopper</title>
+<meta name="theme-color" content="#101b36"><title>Keren! SOARIANO</title>
 <style>
 :root{font-family:"Avenir Next",Avenir,"Segoe UI",sans-serif;color:#f5f7ff;background:#101b36}
 *{box-sizing:border-box}body{min-height:100vh;margin:0;padding:24px 14px;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 0%,#314675,transparent 55%),#101b36}
@@ -24,7 +24,7 @@ button:focus-visible{outline:3px solid #345f9c;outline-offset:4px}
 @media(max-width:420px){body{padding:16px 10px}.frame{border-radius:17px}.hint{font-size:.75rem}}
 </style></head><body>
 <main class="shell">
-<header><div><p class="kicker">A tiny flying game</p><h1>Sky Hopper</h1></div><div class="score" aria-live="polite">SCORE <strong id="score">0</strong><br>BEST <strong id="best">0</strong></div></header>
+<header><div><p class="kicker">A tiny flying game</p><h1>Keren! SOARIANO</h1></div><div class="score" aria-live="polite">SCORE <strong id="score">0</strong><br>BEST <strong id="best">0</strong></div></header>
 <section class="frame" aria-label="Sky Hopper game">
 <canvas id="game" width="480" height="640" aria-label="Dodge the green pipes by flapping through the gaps"></canvas>
 <div class="message" id="message"><div class="card"><span class="tag" id="tag">Ready when you are</span><h2 id="title">Take flight!</h2><p id="copy">Tap, click, or press Space to flap. Slip through the gaps and see how far you can go.</p><button id="start">Start flying</button></div></div>
@@ -58,7 +58,7 @@ ctx.beginPath();ctx.roundRect(p.x-7,p.top-24,PIPE+14,24,7);ctx.stroke();ctx.begi
 function drawBird(){ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(bird.rot);
 ctx.fillStyle="#ffba55";ctx.strokeStyle="#c87930";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(5,7,17,10,0,0,7);ctx.fill();ctx.stroke();
 ctx.fillStyle="#ffe08a";ctx.beginPath();ctx.ellipse(1,9,8,4,Math.sin(frame*.42)*.45,0,7);ctx.fill();
-if(birdHead.complete&&birdHead.naturalWidth){ctx.save();ctx.beginPath();ctx.arc(-5,-2,16,0,Math.PI*2);ctx.clip();ctx.drawImage(birdHead,210,8,278,278,-21,-18,32,32);ctx.restore();ctx.strokeStyle="#fff0be";ctx.lineWidth=2;ctx.beginPath();ctx.arc(-5,-2,16,0,Math.PI*2);ctx.stroke()}
+if(birdHead.complete&&birdHead.naturalWidth){ctx.save();ctx.beginPath();ctx.arc(-5,-2,16,0,Math.PI*2);ctx.clip();const crop=Math.min(birdHead.naturalWidth*.44,birdHead.naturalHeight*.62);ctx.drawImage(birdHead,birdHead.naturalWidth*.60-crop/2,0,crop,crop,-21,-18,32,32);ctx.restore();ctx.strokeStyle="#fff0be";ctx.lineWidth=2;ctx.beginPath();ctx.arc(-5,-2,16,0,Math.PI*2);ctx.stroke()}
 else{ctx.fillStyle="#ffba55";ctx.beginPath();ctx.arc(-5,-2,16,0,Math.PI*2);ctx.fill()}
 ctx.fillStyle="#fa7650";ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(24,4);ctx.lineTo(9,8);ctx.closePath();ctx.fill();ctx.restore()}
 function floor(){ctx.fillStyle="#f6d686";ctx.fillRect(0,FLOOR,W,H-FLOOR);ctx.fillStyle="#8dd596";ctx.fillRect(0,FLOOR,W,13);ctx.fillStyle="#5eb879";ctx.fillRect(0,FLOOR+11,W,4);
