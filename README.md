@@ -10,4 +10,4 @@ Open index.html in a browser, or serve this folder locally:
 
 Then visit http://localhost:8000.
 
-Tap or click, or press Space / Up Arrow, to flap. Fly through the gaps without hitting a pipe or the ground. Your best score is saved in your browser.
+Tap or click, or press Space / Up Arrow, to flap. Fly through the gaps without hitting a pipe or the ground. Your best score is saved in your browser. The custom bird head uses the included bird-head.jpg image.
